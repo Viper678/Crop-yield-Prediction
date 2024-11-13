@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ICICI Bank - Crop Yield Prediction Results</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
+    <style>
+        :root {
+            --icici-orange: #F58220;
+            --icici-blue: #003399;
+            --icici-light-blue: #E6F3FF;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f4f7;
+            margin: 0;
+            padding: 0;
+        }
+
+        .header {
+            background-color: rgba(245, 130, 32, 0.9);
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 30px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: var(--icici-blue);
+            text-align: center;
+            font-size: 28px;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: var(--icici-orange);
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .result-card {
+            background-color: rgba(245, 130, 32, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        #map { 
+            height: 400px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+        .btn-primary {
+            background-color: var(--icici-orange);
+            color: white;
+            padding: 12px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+        .btn-primary:hover {
+            background-color: #D6690D;
+            transform: scale(1.05);
+        }
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+        .text-center {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2><i class="fas fa-leaf"></i> Innovation Labs Crop Yield Prediction</h2>
+    </div>
+
+    <div class="container">
+        <h1>Crop Yield Prediction Results</h1>
+
+        <div class="row">
+            <div class="col-md-6 result-card">
+                <h2>Prediction</h2>
+                <p id="prediction-result" class="lead"></p>
+            </div>
+            <div class="col-md-6 result-card">
+                <h2>Crop Health Visualization</h2>
+                <div id="map"></div>
+            </div>
+        </div>
+
+        <div class="text-center">
+            <a href="/" class="btn-primary">Make Another Prediction</a>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const formData = new FormData();
+            
+            for (const [key, value] of urlParams) {
+                formData.append(key, value);
+            }
+            
+            fetch('/predict', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('prediction-result').textContent = data.prediction;
+                
+                const map = L.map('map').setView([data.district_lat, data.district_lon], 9);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+                L.tileLayer(data.visualization_url).addTo(map);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while processing your request.');
+            });
+        });
+    </script>
+</body>
+</html>
